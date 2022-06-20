@@ -11,6 +11,7 @@ function Logger(logString: string) {
 // Decorators are developed to be used by other developers to provide extra utilities
 function WithTemplate(template: string, hookId: string){
 	return function(constructor: any){
+		console.log("Rendering Template")
 		const hookElement = document.getElementById(hookId);
 		const p = new constructor()
 		if(hookElement){
@@ -23,7 +24,7 @@ function WithTemplate(template: string, hookId: string){
 
 // Applying Decorator with @ to class
 // Decorator gets executed when class is defined
-// @Logger("Logging - Person")
+@Logger("Logging - Person")
 @WithTemplate("<h1>My Person Object </h1>", "app")
 class Person {
 	name = "Max";
