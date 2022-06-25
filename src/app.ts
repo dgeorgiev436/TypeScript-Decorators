@@ -10,14 +10,21 @@ function Logger(logString: string) {
 
 // Decorators are developed to be used by other developers to provide extra utilities
 function WithTemplate(template: string, hookId: string){
-	return function(constructor: any){
-		console.log("Rendering Template")
-		const hookElement = document.getElementById(hookId);
-		const p = new constructor()
-		if(hookElement){
-			hookElement.innerHTML = template;
-			hookElement.querySelector("h1")!.textContent = p.name;
-			
+	return function<T extends {new(..._: any[]): {name: string} }>(originalConstructor: T){
+// 		Return constructor function based on the original
+		return class extends originalConstructor {
+			constructor(...args: any[]){
+// 				Still execute old logic
+				super();
+// 				But also add aditional new logic
+				console.log("Rendering Template")
+				const hookElement = document.getElementById(hookId);
+				if(hookElement){
+					hookElement.innerHTML = template;
+					hookElement.querySelector("h1")!.textContent = this.name;
+
+				}
+			}
 		}
 	}
 }
@@ -35,9 +42,9 @@ class Person {
 }
 
 
-const person1 = new Person();
+// const person1 = new Person();
 
-console.log(person1);
+// console.log(person1);
 
 // *********************
 // Property decorators that are run on properties of a class
