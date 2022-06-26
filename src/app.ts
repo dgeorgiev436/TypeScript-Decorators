@@ -129,9 +129,64 @@ const printer1 = new Printer();
 const button = document.querySelector("button")!;
 button.addEventListener("click", printer1.showMessage);
 
+// USING DECORATORS FOR VALIDATION
+
+interface ValidatorConfig {
+	[property: string]: {
+		
+		[validatableProperty: string]: string[]
+	}
+}
+
+const registeredValidators: ValidatorConfig = {};
+
+
+function Required(target: any, propName: string){
+	
+	registeredValidators[target.constructor.name] = {
+		
+		...registeredValidators[target.constructor.name],
+		[propName]: ["required"]
+	}
+}
+
+function PositiveNumber(target: any, propName: string){
+	registeredValidators[target.constructor.name] = {
+		
+		...registeredValidators[target.constructor.name],
+		[propName]: ["positive"]
+	}
+}
+
+function Validate(obj: any){
+	
+	const objValidatorConfig = registeredValidators[obj.constructor.name];
+	if(!objValidatorConfig){
+		return true;
+	}
+	
+	let isValid = true;
+	for(const prop in objValidatorConfig){
+		console.log(prop);
+		for(const validator of objValidatorConfig[prop]){
+			switch(validator){
+				case "required":
+					isValid = isValid && !!obj[prop];
+					break;
+				case "positive":
+					isValid = isValid && obj[prop] > 0;
+					break;
+			}
+		}
+	}
+	return isValid;
+}
+
 
 class Course {
+	@Required
 	title: string;
+	@PositiveNumber
 	price: number;
 	
 	constructor(t: string, p: number){
@@ -151,5 +206,10 @@ courseForm.addEventListener("submit", event => {
 	
 	
 	const createdCourse = new Course(title, price);
+	
+	if (!Validate(createdCourse)){
+		alert("Invalid Input. Please try again.")
+		return;
+	}
 	console.log(createdCourse);
 })
