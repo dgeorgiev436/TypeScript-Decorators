@@ -13,7 +13,7 @@ function WithTemplate(template: string, hookId: string){
 	return function<T extends {new(..._: any[]): {name: string} }>(originalConstructor: T){
 // 		Return constructor function based on the original
 		return class extends originalConstructor {
-			constructor(...args: any[]){
+			constructor(..._: any[]){
 // 				Still execute old logic
 				super();
 // 				But also add aditional new logic
@@ -98,3 +98,33 @@ class Product {
 		return this._price * (1 + tax)
 	}
 }
+
+function AutoBind(_: any, _2: string, descriptor: PropertyDescriptor){
+// 	Get access to the original method
+	const originalMethod = descriptor.value
+// 	Overrite the property descriptor with the adjusted property descriptor
+	const adjDescriptor: PropertyDescriptor = {
+		configurable: true,
+		enumerable: false,
+// 		Add Extra logic when accessing the property
+		get(){
+			const boundFn = originalMethod.bind(this);
+			return boundFn;
+		}
+	} 
+	return adjDescriptor
+}
+
+class Printer {
+	message = "This Works";
+	
+	@AutoBind
+	showMessage(){
+		console.log(this.message)
+	}
+}
+
+const printer1 = new Printer();
+
+const button = document.querySelector("button")!;
+button.addEventListener("click", printer1.showMessage);
